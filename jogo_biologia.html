@@ -119,11 +119,11 @@
         <div id="question-container" class="question"></div>
         
         <div class="answer-buttons">
-            <button class="answer-button" onclick="checkAnswer('sim')">Sim</button>
-            <button class="answer-button" onclick="checkAnswer('não')">Não</button>
+            <button id="sim-button" class="answer-button" onclick="checkAnswer('sim')">Sim</button>
+            <button id="nao-button" class="answer-button" onclick="checkAnswer('não')">Não</button>
         </div>
 
-        <button class="btn mt-3" onclick="nextQuestion()">Próxima Pergunta</button>
+        <button id="next-question-button" class="btn mt-3" onclick="nextQuestion()">Próxima Pergunta</button>
 
         <div id="message-container" class="message"></div>
     </div>
@@ -192,7 +192,6 @@
         }
 
         function clearMessage() {
-            // Limpar a mensagem de resposta antes de carregar a próxima pergunta
             const messageContainer = document.getElementById("message-container");
             messageContainer.innerText = "";
             messageContainer.classList.remove("correct", "incorrect");
@@ -211,6 +210,10 @@
         }
 
         function checkAnswer(answer) {
+            // Desabilitar os botões de resposta após o clique
+            document.getElementById("sim-button").disabled = true;
+            document.getElementById("nao-button").disabled = true;
+
             const currentAnimal = animals[currentAnimalIndex];
             const currentQuestion = currentAnimal.questions[currentQuestionIndex];
 
@@ -230,8 +233,10 @@
         }
 
         function nextQuestion() {
-            clearMessage(); // Limpa a mensagem de resposta antes de carregar a próxima pergunta
-            
+            clearMessage();
+            document.getElementById("sim-button").disabled = false; // Reabilitar os botões
+            document.getElementById("nao-button").disabled = false;
+
             const currentAnimal = animals[currentAnimalIndex];
             currentQuestionIndex++;
 
