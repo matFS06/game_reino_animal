@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificação do Reino Animal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Comic Sans MS', sans-serif;
+            background-color: #f1f8ff;
+            padding: 20px;
+            text-align: center;
+            background-image: url('animais.jpg'); /* Aqui você adiciona o link da sua imagem de fundo */
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin-top: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            border: 5px solid #007bff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .animal {
+            font-size: 24px;
+            font-weight: bold;
+            background-color: #ffeb3b;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .question {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            font-size: 18px;
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .scoreboard {
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: white; /* Fundo branco para a caixa de vidas e pontos */
+            border-radius: 10px;
+            border: 2px solid #007bff;
+            display: inline-block;
+        }
+
+        .life {
+            font-size: 24px;
+            color: red;
+        }
+
+        .answer-buttons {
+            margin-top: 20px;
+        }
+
+        .answer-button {
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .answer-button:hover {
+            background-color: #0056b3;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .correct {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .incorrect {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="scoreboard">
+        <span id="score">Pontos: 0</span> | <span id="lives">Vidas: 3</span>
+        <span style="font-size: 24px; margin-left: 10px;">❤️</span> <!-- Emoji de coração -->
+    </div>
+
+    <div class="container">
+        <h2 class="question">Vamos aprender sobre o animal!</h2>
+        <div id="animal" class="animal"></div>
+        
+        <div id="question-container" class="question"></div>
+        
+        <div class="answer-buttons">
+            <button class="answer-button" onclick="checkAnswer('sim')">Sim</button>
+            <button class="answer-button" onclick="checkAnswer('não')">Não</button>
+        </div>
+
+        <button class="btn mt-3" onclick="nextQuestion()">Próxima Pergunta</button>
+
+        <div id="message-container" class="message"></div>
+    </div>
+
+    <script>
+        let score = 0;
+        let lives = 3;
+
+        let animals = [
+            {
+                name: "Leão",
+                questions: [
+                    { question: "O Leão é vertebrado?", correctAnswer: "sim" },
+                    { question: "O habitat natural do Leão é a Savana?", correctAnswer: "sim" },
+                    { question: "O Leão é um mamífero?", correctAnswer: "sim" }
+                ]
+            },
+            {
+                name: "Cobra",
+                questions: [
+                    { question: "Todas as cobras são venenosas?", correctAnswer: "não" },
+                    { question: "A Cobra vive no mar?", correctAnswer: "não" },
+                    { question: "A Cobra é um réptil?", correctAnswer: "sim" }
+                ]
+            },
+            {
+                name: "Borboleta",
+                questions: [
+                    { question: "A Borboleta é um inseto?", correctAnswer: "sim" },
+                    { question: "A Borboleta é vertebrada?", correctAnswer: "não" },
+                    { question: "A Borboleta vive em florestas?", correctAnswer: "sim" }
+                ]
+            },
+            {
+                name: "Elefante",
+                questions: [
+                    { question: "O Elefante é um mamífero?", correctAnswer: "sim" },
+                    { question: "O Elefante é encontrado em florestas tropicais?", correctAnswer: "não" },
+                    { question: "O Elefante é herbívoro?", correctAnswer: "sim" }
+                ]
+            },
+            {
+                name: "Lesma",
+                questions: [
+                    { question: "A Lesma pode transmitir doenças?", correctAnswer: "sim" },
+                    { question: "A Lesma é vertebrada?", correctAnswer: "não" },
+                    { question: "A Lesma se desloca usando muco?", correctAnswer: "sim" }
+                ]
+            },
+            {
+                name: "Camarão",
+                questions: [
+                    { question: "O Camarão é um crustáceo?", correctAnswer: "sim" },
+                    { question: "O Camarão vive em terra?", correctAnswer: "não" },
+                    { question: "O Camarão é um animal aquático?", correctAnswer: "sim" }
+                ]
+            }
+        ];
+
+        let currentAnimalIndex = 0;
+        let currentQuestionIndex = 0;
+
+        function updateScoreboard() {
+            document.getElementById("score").innerText = "Pontos: " + score;
+            document.getElementById("lives").innerText = "Vidas: " + lives;
+        }
+
+        function clearMessage() {
+            // Limpar a mensagem de resposta antes de carregar a próxima pergunta
+            const messageContainer = document.getElementById("message-container");
+            messageContainer.innerText = "";
+            messageContainer.classList.remove("correct", "incorrect");
+        }
+
+        function showMessage(message, isCorrect) {
+            const messageContainer = document.getElementById("message-container");
+            messageContainer.innerText = message;
+            messageContainer.classList.remove("correct", "incorrect");
+
+            if (isCorrect) {
+                messageContainer.classList.add("correct");
+            } else {
+                messageContainer.classList.add("incorrect");
+            }
+        }
+
+        function checkAnswer(answer) {
+            const currentAnimal = animals[currentAnimalIndex];
+            const currentQuestion = currentAnimal.questions[currentQuestionIndex];
+
+            if (answer === currentQuestion.correctAnswer) {
+                score += 10;
+                showMessage("Muito bem! Resposta correta.", true);
+            } else {
+                lives -= 1;
+                showMessage("Ops! Resposta incorreta.", false);
+                if (lives === 0) {
+                    showMessage("VOCÊ PERDEU! Tente novamente.", false);
+                    setTimeout(() => location.reload(), 2000);
+                    return;
+                }
+            }
+            updateScoreboard();
+        }
+
+        function nextQuestion() {
+            clearMessage(); // Limpa a mensagem de resposta antes de carregar a próxima pergunta
+            
+            const currentAnimal = animals[currentAnimalIndex];
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex >= currentAnimal.questions.length) {
+                currentAnimalIndex++;
+                if (currentAnimalIndex >= animals.length) {
+                    showMessage("Parabéns! Você completou todas as perguntas!", true);
+                    setTimeout(() => location.reload(), 2000);
+                    return;
+                }
+                currentQuestionIndex = 0;
+            }
+
+            generateRound();
+        }
+
+        function generateRound() {
+            const currentAnimal = animals[currentAnimalIndex];
+            const currentQuestion = currentAnimal.questions[currentQuestionIndex];
+
+            let animalContainer = document.getElementById("animal");
+            let questionContainer = document.getElementById("question-container");
+
+            animalContainer.innerText = currentAnimal.name;
+            questionContainer.innerText = currentQuestion.question;
+        }
+
+        generateRound(); // Inicia o jogo
+    </script>
+</body>
+</html>
